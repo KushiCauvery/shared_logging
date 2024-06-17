@@ -1,11 +1,13 @@
 README.md
 setup.py
 shared_logging/__init__.py
+shared_logging/appconfig.py
 shared_logging/constants.py
 shared_logging/exception_constants.py
 shared_logging/exceptions.py
 shared_logging/form_validator.py
 shared_logging/logger.py
+shared_logging/logger_config.py
 shared_logging/settings.py
 shared_logging/utils.py
 shared_logging.egg-info/PKG-INFO

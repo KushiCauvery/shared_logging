@@ -69,6 +69,7 @@ def custom_log(level, request=None, params=None):
     :param: access_token: access_token of the user
     :param: params: dict of the data to be logged
     """
+    print("logss")
     try:
         access_token = ""
         agent_code = ""
