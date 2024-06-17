@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='shared_logging',
-    version='0.1',
+    version='0.2',
     packages=['shared_logging'],
     install_requires=[
         'django',
