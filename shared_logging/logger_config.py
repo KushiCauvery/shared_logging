@@ -1,48 +1,46 @@
 import os
+import logging
+from logging.handlers import RotatingFileHandler
+from django.conf import settings
 
-HDFC_LOG_HANDLER = ['default', 'gelf']
+# Ensure logs directory exists
+LOG_DIR = os.path.join(settings.BASE_DIR, 'logs')
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# This setting level variable is of type boolean and if set to true the Mobile User Request Logging
-# takes place otherwise it doesn't
-MOBILE_USER_LOGGING = True
+# Define log file paths
+LOG_FILE_API = os.path.join(LOG_DIR, 'api_hdfclife.log')
+LOG_FILE_USER_REQUEST = os.path.join(LOG_DIR, 'user_request.log')
+LOG_FILE_CMS_INFO = os.path.join(LOG_DIR, 'cms_info.log')
+LOG_FILE_CMS_ERROR = os.path.join(LOG_DIR, 'cms_error.log')
+LOG_FILE_CMS_WARN = os.path.join(LOG_DIR, 'cms_warn.log')
+LOG_FILE_CMS_DEBUG = os.path.join(LOG_DIR, 'cms_debug.log')
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'standard': {
-            'format': '%(asctime)s || [%(levelname)s] || %(name)s || %(message)s'
+            'format': '%(asctime)s || [%(levelname)s] || %(name)s || %(message)s',
         },
         'simple': {
-            #'[%(asctime)s] - \n %(message)s \n================= \n',
-            'datefmt': '%d-%m-%Y %H:%M:%S'
+            'format': '[%(asctime)s] - %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
         },
     },
     'handlers': {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/api_hdfclife.log'),
-            'maxBytes': 1024*1024*50,
+            'filename': LOG_FILE_API,
+            'maxBytes': 1024*1024*50,  # 50 MB
             'backupCount': 10,
             'formatter': 'standard',
-        },
-        'stream': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard',
-        },
-        'gelf': {
-            'class': 'graypy.GELFTCPHandler',
-            'host': 'localhost',
-            'port': 12201,
         },
         'user_request': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/user_request.log'),
+            'filename': LOG_FILE_USER_REQUEST,
             'maxBytes': 1024 * 1024 * 50,
             'backupCount': 10,
             'formatter': 'simple',
@@ -50,7 +48,7 @@ LOGGING = {
         'cms_info': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/cms_info.log'),
+            'filename': LOG_FILE_CMS_INFO,
             'maxBytes': 1024*1024*50,
             'backupCount': 10,
             'formatter': 'simple',
@@ -58,7 +56,7 @@ LOGGING = {
         'cms_error': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/cms_error.log'),
+            'filename': LOG_FILE_CMS_ERROR,
             'maxBytes': 1024*1024*50,
             'backupCount': 10,
             'formatter': 'simple',
@@ -66,7 +64,7 @@ LOGGING = {
         'cms_warn': {
             'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/cms_warn.log'),
+            'filename': LOG_FILE_CMS_WARN,
             'maxBytes': 1024*1024*50,
             'backupCount': 10,
             'formatter': 'simple',
@@ -74,42 +72,41 @@ LOGGING = {
         'cms_debug': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, '../logs/cms_debug.log'),
+            'filename': LOG_FILE_CMS_DEBUG,
             'maxBytes': 1024*1024*50,
             'backupCount': 10,
             'formatter': 'simple',
         },
+        # Add other handlers as needed
     },
     'loggers': {
         'default': {
-            'handlers': HDFC_LOG_HANDLER,
+            'handlers': ['default'],
             'level': 'DEBUG',
-            'propagate': True
+            'propagate': True,
         },
         'cms_info': {
             'handlers': ['cms_info'],
-            'level': 'DEBUG',
-            'propagate': True
+            'level': 'INFO',
+            'propagate': True,
         },
         'cms_error': {
             'handlers': ['cms_error'],
-            'level': 'DEBUG',
-            'propagate': True
+            'level': 'ERROR',
+            'propagate': True,
         },
         'cms_warn': {
             'handlers': ['cms_warn'],
-            'level': 'DEBUG',
-            'propagate': True
+            'level': 'WARNING',
+            'propagate': True,
         },
         'cms_debug': {
             'handlers': ['cms_debug'],
             'level': 'DEBUG',
-            'propagate': True
+            'propagate': True,
         },
-        'django.request': {
-            'handlers': HDFC_LOG_HANDLER,
-            'level': 'ERROR',
-            'propagate': False
-        },
-    }
+        # Add other loggers as needed
+    },
 }
+
+logging.config.dictConfig(LOGGING)

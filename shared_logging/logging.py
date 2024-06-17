@@ -4,7 +4,7 @@ from inspect import getframeinfo, stack
 from datetime import datetime, date, time
 
 from django.core.handlers.wsgi import WSGIRequest
-
+from .settings import *
 from rest_framework.request import Request
 
 logger = logging.getLogger("default")
@@ -69,7 +69,6 @@ def custom_log(level, request=None, params=None):
     :param: access_token: access_token of the user
     :param: params: dict of the data to be logged
     """
-    print("logss")
     try:
         access_token = ""
         agent_code = ""
