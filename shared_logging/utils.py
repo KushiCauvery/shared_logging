@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 
-from shared_logging.logger import custom_log
+from .logging import custom_log
 
 def response(data, code=status.HTTP_200_OK, error="", request=None, to_log=True):
     """Overrides rest_framework response
