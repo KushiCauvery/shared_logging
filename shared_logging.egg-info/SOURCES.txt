@@ -7,6 +7,7 @@ shared_logging/exceptions.py
 shared_logging/form_validator.py
 shared_logging/logger.py
 shared_logging/settings.py
+shared_logging/utils.py
 shared_logging.egg-info/PKG-INFO
 shared_logging.egg-info/SOURCES.txt
 shared_logging.egg-info/dependency_links.txt
