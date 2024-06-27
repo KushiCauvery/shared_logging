@@ -4,7 +4,6 @@ from inspect import getframeinfo, stack
 from datetime import datetime, date, time
 
 from django.core.handlers.wsgi import WSGIRequest
-from .settings import *
 from rest_framework.request import Request
 
 logger = logging.getLogger("default")

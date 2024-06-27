@@ -1,5 +1,7 @@
 try:
     from .logger_config import *
+    from .external_config import *
+    from .notification_config import *
 except ImportError as import_error:
     print(import_error.msg)
     print("Please make sure that correct version of file/path exists.")

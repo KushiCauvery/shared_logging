@@ -3,21 +3,19 @@ import json
 from datetime import datetime
 import pystache
 import subprocess
-
 from rest_framework.exceptions import APIException
-
-from .constants import APP_OS
-from api.renderer.models import AppConfigurations
-from webapp.conf import settings
-from webapp import LOG_CLIENT
+from .external_utils import encrypt_response_json
+from .renderer_constants import APP_OS
+from .models import AppConfigurations
+from . import settings
 from .exception_constants import *
 from . import constants as api_constants
-from .logger import custom_log
+from .logging import custom_log
 
 logger = logging.getLogger("default")
 
-'''
-def log_to_mongo(status_type, exception_type, code, exception_code, detail, headers, body, url, is_popup,
+
+def log_to_exception(status_type, exception_type, code, exception_code, detail, headers, body, url, is_popup,
                  specific_details, request):
     """
     Logs the following data to mongodb:
@@ -32,28 +30,23 @@ def log_to_mongo(status_type, exception_type, code, exception_code, detail, head
     - is_popup :
     - specific_details : dict which contains app_no, quote_id, tebt_quote_id, txn_id, combo_cc_quote_id
     """
-    if settings.EXCEPTION_LOG_TO_MONGO:
-        # Using global connection pool defined in webapp/__init__.py
-        exception_logger_collection = LOG_CLIENT[settings.MONGO_LOG_DB_NAME][settings.EXCEPTION_LOG_MODEL]
-        try:
-            data_to_log = {
-                "status_type": status_type,
-                "exception_type": exception_type,
-                "code": code,
-                "exception_code": exception_code,
-                "detail": detail,
-                "headers": str(headers),
-                "body": body,
-                "myurl": url,
-                "is_popup": is_popup
-            }
-            data_to_log.update(specific_details)
-            custom_log("error", request, data_to_log)
-            data_to_log["logged_at"] = datetime.now()
-            result = exception_logger_collection.insert_one(data_to_log)
-        except:
-            logger.info("Error while writing exception details to mongodb")
-'''
+    try:
+        data_to_log = {
+            "status_type": status_type,
+            "exception_type": exception_type,
+            "code": code,
+            "exception_code": exception_code,
+            "detail": detail,
+            "headers": str(headers),
+            "body": body,
+            "myurl": url,
+            "is_popup": is_popup
+        }
+        data_to_log.update(specific_details)
+        custom_log("error", request, data_to_log)
+    except:
+        logger.info("Error while writing exception details to mongodb")
+
 
 def parse_request_body(body):
     try:
@@ -85,7 +78,6 @@ class GenericException(APIException):
         if exception_code in RETRYABLE_CODE.values():
             self.exception_type = EXCEPTION_TYPE_RETRYABLE
         if to_be_encrypted and self.detail:
-            from api.external.aes_encryption import encrypt_response_json
             self.detail = {'data': encrypt_response_json(None, self.detail)}
         if masked_data:
             url = request['path']
@@ -93,10 +85,8 @@ class GenericException(APIException):
             headers = request['meta']
             body = request['data']
             body = parse_request_body(body)
-            '''
-            log_to_mongo(status_type, self.exception_type, code, exception_code, detail, headers, body, url, is_popup,
+            log_to_exception(status_type, self.exception_type, code, exception_code, detail, headers, body, url, is_popup,
                          specific_details, request)
-            '''
             # logger.info(self.exception_type + "|||" + str(code) + "|||" + str(exception_code) + "|||" + str(detail) + "|||" + str(headers) + "|||" + body + "|||" + str(url))
         elif response:
             headers = response.request.headers
@@ -104,10 +94,8 @@ class GenericException(APIException):
             url = response.url
             code = response.status_code
             body = parse_request_body(body)
-            '''
-            log_to_mongo(status_type, self.exception_type, code, exception_code, detail, headers, body, url, is_popup,
+            log_to_exception(status_type, self.exception_type, code, exception_code, detail, headers, body, url, is_popup,
                          specific_details, request)
-            '''
             # logger.info(self.exception_type+"|||"+str(code)+"|||"+str(exception_code)+"|||"+str(detail)+"|||"+str(headers)+"|||" + body+"|||"+str(url))
         elif request:
             url = request.path
@@ -121,16 +109,12 @@ class GenericException(APIException):
             else:
                 body = request.data
             body = parse_request_body(body)
-            '''
-            log_to_mongo(status_type, self.exception_type, code, exception_code, detail, headers, body, url, is_popup,
+            log_to_exception(status_type, self.exception_type, code, exception_code, detail, headers, body, url, is_popup,
                          specific_details, request)
-            '''
             # logger.info(self.exception_type+"|||"+str(code)+"|||"+str(exception_code)+"|||"+str(detail)+"|||"+str(headers)+"|||" + body+"|||"+str(url))
         else:
-            '''
-            log_to_mongo(status_type, self.exception_type, http_code, exception_code, detail, headers, body, url,
+            log_to_exception(status_type, self.exception_type, http_code, exception_code, detail, headers, body, url,
                          is_popup, specific_details, request)
-            '''
             
         self.check_mail_trigger(detail, url, request)
 
@@ -157,7 +141,7 @@ class GenericException(APIException):
             except Exception as e:
                 custom_log(level='info', request=request, params={'body': {},
                     'detail': "Error while getting sys_ip for sending mails for exceptions. It was due to" + repr(e)})
-            from api.external.email_service import send_email_to_user
+            from .email_service import send_email_to_user
             send_email_to_user(
                 to_address=settings.SEND_EXCEPTION_NOTIFICATIONS_TO_EMAIL,
                 message=pystache.render(api_constants.ERROR_MAIL_MESSAGE, {'error_message': error_message, 'url': url}),

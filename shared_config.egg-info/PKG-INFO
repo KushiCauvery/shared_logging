@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: shared_config
+Version: 0.1
+Requires-Dist: django
+Requires-Dist: djangorestframework
+Requires-Dist: pycryptodome
+Requires-Dist: django-environ
+Requires-Dist: pystache
+Requires-Dist: psycopg2

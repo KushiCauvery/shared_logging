@@ -1,7 +1,7 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from django.conf import settings
+from . import settings
 
 # Ensure logs directory exists
 LOG_DIR = os.path.join(settings.BASE_DIR, 'logs')
