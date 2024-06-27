@@ -27,7 +27,15 @@ SECRET_KEY = 'django-insecure-sk&j)!pu1l4l@6dorisp^93$)+dli5vq2&xb)#m&bbl97d@cxq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 env = environ.Env()
-env.read_env(BASE_DIR + "/.env")
+
+# Build path to .env file (assuming project structure)
+env_file_path = str(Path(__file__).resolve().parent.parent.parent / ".env")
+
+# Read and load environment variables from .env file
+environ.Env.read_env(env_file_path)
+
+# Access specific environment variable
+POSTGRES_APP_DB_PASSWORD = env('POSTGRES_APP_DB_PASSWORD')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = env.bool("DJANGO_DEBUG", False)
